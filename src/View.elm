@@ -40,7 +40,7 @@ view model =
             }
             [ width fill
             , height fill
-            , BG.image "/plain.jpg"
+            , BG.image Img.bg
             , Font.family [ Font.typeface "Courier New" ]
             ]
 

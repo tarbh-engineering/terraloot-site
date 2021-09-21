@@ -1,3 +1,5 @@
+require("./index.css");
+
 import detectEthereumProvider from "@metamask/detect-provider";
 import WalletConnect from "@walletconnect/client";
 import QRCodeModal from "@walletconnect/qrcode-modal";
