@@ -1,0 +1,8 @@
+{
+  "name": "Terraloot",
+  "description": "Mars has a future. Acquire the tools to take part.",
+  "image": "https://terraloot.dev/maskable.png",
+  "external_link": "https://terraloot.dev",
+  "seller_fee_basis_points": 250,
+  "fee_recipient": "0x3Ed2a5A811648A2377058c7763be7AEbE13fCADb"
+}
