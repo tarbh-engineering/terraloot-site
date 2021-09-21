@@ -6,7 +6,7 @@ import Element.Border as Border
 import Element.Font as Font
 import Element.Input as Input
 import Eth.Utils
-import Helpers.View exposing (cappedWidth, style, when, whenJust)
+import Helpers.View exposing (cappedWidth, style, when, whenAttr, whenJust)
 import Html exposing (Html)
 import Html.Attributes
 import Html.Events
@@ -67,6 +67,7 @@ viewHome model =
       ]
         |> column
             [ centerX
+            , Font.color white
             , Font.size
                 (if model.small then
                     55
@@ -78,19 +79,14 @@ viewHome model =
             , fadeIn
             ]
     , [ text "Mars has a future. Acquire the tools to take part." ]
-        |> paragraph [ Font.center ]
-    , Input.button
-        [ centerX
-        , BG.color white
-        , Font.color black
-        , padding 15
-        , Border.rounded 10
-        , hover
-        , shadow
-        ]
-        { onPress = Just <| Types.SetView Types.ViewClaim
-        , label = text "Claim NFT"
-        }
+        |> paragraph
+            [ Font.center
+            , Font.color white
+            ]
+    , btn
+        (Just <| Types.SetView Types.ViewClaim)
+        (text "Claim NFT")
+        |> el [ centerX ]
     , [ Input.button [ Font.underline, hover, Font.size fn ]
             { onPress = Just <| Types.SetView Types.ViewAbout
             , label = text "Learn More"
@@ -104,7 +100,7 @@ viewHome model =
             , label = text "Contract"
             }
       ]
-        |> row [ spacing 30, centerX ]
+        |> row [ spacing 30, centerX, Font.color white ]
     , Input.button
         [ cappedWidth 400
         , centerX
@@ -119,7 +115,6 @@ viewHome model =
         |> column
             [ centerX
             , spacing 40
-            , Font.color white
             , padding
                 (if model.small then
                     30
@@ -227,8 +222,6 @@ viewAbout model =
             , cappedWidth 750
             , centerX
             , height fill
-
-            --, Element.paddingXY 10 10
             , padding 10
             ]
         |> scroller
@@ -245,9 +238,21 @@ viewClaim model =
     , model.address
         |> unwrap
             ([ connectButton
+                (if model.connectInProg then
+                    Nothing
+
+                 else
+                    Just Types.Connect
+                )
                 |> el [ centerX ]
                 |> when model.hasWallet
              , wButton
+                (if model.connectInProg then
+                    Nothing
+
+                 else
+                    Just Types.WConnect
+                )
              ]
                 |> column [ centerX, spacing 20 ]
             )
@@ -273,54 +278,67 @@ viewClaim model =
                   ]
                     |> column
                         [ spacing 15
-                        , Font.color black
                         , Font.size 17
                         , BG.color white
                         , padding 15
                         , Border.rounded 10
                         , centerX
                         ]
-                , Input.text
-                    [ onEnter Types.Claim
+                , [ Input.text
+                        [ onEnter Types.Claim
+                            |> whenAttr (not model.claimInProg)
+                        , spinner
+                            |> el
+                                [ Element.alignRight
+                                , Element.centerY
+                                , Element.paddingXY 10 0
+                                ]
+                            |> when model.claimInProg
+                            |> Element.inFront
+                        , Border.rounded 0
+                        , Font.color black
+                        , Html.Attributes.maxlength 4
+                            |> Element.htmlAttribute
+                        , Html.Attributes.disabled model.claimInProg
+                            |> Element.htmlAttribute
+                        ]
+                        { onChange = Types.IdUpdate
+                        , placeholder =
+                            text "0-9999"
+                                |> Input.placeholder []
+                                |> Just
+                        , text = model.claim
+                        , label = Input.labelHidden ""
+                        }
+                  , btn
+                        (if model.claimInProg then
+                            Nothing
 
-                    --, spinner
-                    --|> el [ Element.alignRight, Element.centerY, Element.paddingXY 5 0 ]
-                    --|> when model.inProgress
-                    --|> Element.inFront
-                    --, cappedWidth 250
-                    , Font.color black
-                    , centerX
-                    , Html.Attributes.maxlength 10
-                        |> Element.htmlAttribute
-
-                    --, Html.Attributes.disabled model.inProgress
-                    --|> Element.htmlAttribute
-                    ]
-                    { onChange = Types.IdUpdate
-                    , placeholder =
-                        text "0-9999"
-                            |> Input.placeholder []
-                            |> Just
-                    , text = model.claim
-                    , label = Input.labelHidden ""
-                    }
-                , model.claimTx
-                    |> whenJust
-                        (\tx ->
-                            [ text "Success!"
-                                |> el [ Font.bold, centerX ]
-                            , Element.newTabLink [ Font.underline, hover ]
-                                { url = "https://etherscan.io/tx/" ++ Eth.Utils.txHashToString tx
-                                , label = text "View transaction"
-                                }
-                            ]
-                                |> column
-                                    [ padding 10
-                                    , centerX
-                                    , BG.color white
-                                    , spacing 10
-                                    ]
+                         else
+                            Just Types.Claim
                         )
+                        (text "Submit")
+                        |> el [ Element.alignRight ]
+                  , model.claimTx
+                        |> whenJust
+                            (\tx ->
+                                [ text "Success!"
+                                    |> el [ Font.bold, centerX, Font.size 21 ]
+                                , Element.newTabLink [ Font.underline, hover, Font.size 17 ]
+                                    { url = "https://etherscan.io/tx/" ++ Eth.Utils.txHashToString tx
+                                    , label = text "View transaction"
+                                    }
+                                ]
+                                    |> column
+                                        [ padding 10
+                                        , centerX
+                                        , spacing 10
+                                        ]
+                            )
+                  ]
+                    |> column [ spacing 20 ]
+                    |> wrapper "Claim a token"
+                    |> el [ centerX ]
                 ]
                     |> column [ spacing 20, centerX ]
             )
@@ -507,24 +525,18 @@ scroller =
         ]
 
 
-connectButton : Element Msg
-connectButton =
-    Input.button [ BG.color white, shadow, padding 15, Border.rounded 10, hover ]
-        { onPress = Just Types.Connect
-        , label =
-            [ Img.metamask, text "MetaMask" ]
-                |> row [ spacing 20, Font.color black, Font.size 17 ]
-        }
+connectButton : Maybe msg -> Element msg
+connectButton msg =
+    [ Img.metamask, text "MetaMask" ]
+        |> row [ spacing 20, Font.size 17 ]
+        |> btn msg
 
 
-wButton : Element Msg
-wButton =
-    Input.button [ BG.color white, shadow, padding 15, Border.rounded 10, hover ]
-        { onPress = Just Types.WConnect
-        , label =
-            [ Img.walletConnect, text "WalletConnect" ]
-                |> row [ spacing 20, Font.color black, Font.size 17 ]
-        }
+wButton : Maybe msg -> Element msg
+wButton msg =
+    [ Img.walletConnect, text "WalletConnect" ]
+        |> row [ spacing 20, Font.size 17 ]
+        |> btn msg
 
 
 onEnter : msg -> Attribute msg
@@ -568,3 +580,34 @@ topBar =
         , label = text "TERRALOOT"
         }
         |> el [ cappedWidth 1000, centerX ]
+
+
+btn : Maybe msg -> Element msg -> Element msg
+btn msg elem =
+    Input.button
+        [ BG.color white
+        , Font.color black
+        , shadow
+        , padding 15
+        , Border.rounded 10
+        , hover
+            |> whenAttr (msg /= Nothing)
+        , style "cursor" "wait"
+            |> whenAttr (msg == Nothing)
+        ]
+        { onPress = msg
+        , label = elem
+        }
+
+
+rotate : Attribute msg
+rotate =
+    style "animation" "rotation 0.7s infinite linear"
+
+
+spinner : Element msg
+spinner =
+    Img.sun
+        |> el
+            [ rotate
+            ]

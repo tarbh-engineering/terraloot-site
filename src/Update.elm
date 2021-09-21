@@ -28,7 +28,10 @@ update msg model =
                 |> BigInt.fromIntString
                 |> unwrap ( model, Cmd.none )
                     (\v ->
-                        ( model
+                        ( { model
+                            | claimInProg = True
+                            , claimTx = Nothing
+                          }
                         , Contracts.Terraloot.claim model.contract v
                             |> (\r ->
                                     { r
@@ -100,17 +103,21 @@ update msg model =
             )
 
         WConnect ->
-            ( model, Ports.wConnect () )
+            ( model
+            , Ports.wConnect ()
+            )
 
         Connect ->
-            ( model, Ports.connect () )
+            ( { model | connectInProg = True }
+            , Ports.connect ()
+            )
 
         ClaimCb val ->
             val
                 |> JD.decodeValue Eth.Decode.txHash
                 |> Result.toMaybe
                 |> unwrap
-                    ( model
+                    ( { model | claimInProg = False }
                     , val
                         |> Json.Encode.encode 2
                         |> Ports.log
@@ -118,6 +125,7 @@ update msg model =
                     (\tx ->
                         ( { model
                             | claimTx = Just tx
+                            , claimInProg = False
                             , claim = ""
                           }
                         , Cmd.none
@@ -129,10 +137,15 @@ update msg model =
                 |> JD.decodeValue Eth.Decode.address
                 |> Result.toMaybe
                 |> unwrap
-                    ( model, Cmd.none )
+                    ( { model
+                        | connectInProg = False
+                      }
+                    , Cmd.none
+                    )
                     (\address ->
                         ( { model
                             | address = Just address
+                            , connectInProg = False
                           }
                         , Cmd.none
                         )

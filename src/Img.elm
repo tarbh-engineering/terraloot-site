@@ -1,4 +1,4 @@
-module Img exposing (loot, metamask, walletConnect)
+module Img exposing (loot, metamask, sun, walletConnect)
 
 import Array exposing (Array)
 import Element exposing (Element)
@@ -87,6 +87,24 @@ walletConnect =
         , Svg.Attributes.width "40"
         ]
         [ Svg.path [ fill "#3B99FC", Svg.Attributes.fillRule "nonzero", d "M61.4 36.3a127.1 127.1 0 01177.2 0l5.8 5.7a6 6 0 010 8.7l-20 19.7a3.2 3.2 0 01-4.5 0l-8.1-8a88.7 88.7 0 00-123.6 0L79.5 71a3.2 3.2 0 01-4.4 0L55 51.3a6 6 0 010-8.7l6.4-6.3zM280.2 77l18 17.6a6 6 0 010 8.6l-80.9 79.2a6.4 6.4 0 01-8.8 0L151 126.2c-.6-.6-1.6-.6-2.2 0l-57.4 56.2a6.4 6.4 0 01-8.8 0L1.9 103.2a6 6 0 010-8.6L19.8 77a6.4 6.4 0 018.8 0L86 133.2a1.6 1.6 0 002.2 0L145.6 77a6.4 6.4 0 018.8 0l57.4 56.2c.6.6 1.6.6 2.2 0L271.4 77a6.4 6.4 0 018.8 0z" ] [] ]
+        |> wrap
+
+
+sun : Element msg
+sun =
+    svg
+        [ height "24px"
+        , viewBox "0 0 24 24"
+        , width "24px"
+        , fill "#000000"
+        ]
+        [ Svg.path
+            [ d "M0 0h24v24H0z"
+            , fill "none"
+            ]
+            []
+        , Svg.path [ d "M20 15.31L23.31 12 20 8.69V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69zM12 18c-3.31 0-6-2.69-6-6s2.69-6 6-6 6 2.69 6 6-2.69 6-6 6z" ] []
+        ]
         |> wrap
 
 

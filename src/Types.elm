@@ -23,6 +23,8 @@ type alias Model =
     , claim : String
     , claimTx : Maybe TxHash
     , hasWallet : Bool
+    , connectInProg : Bool
+    , claimInProg : Bool
     }
 
 

@@ -45,6 +45,8 @@ init flags =
       , claim = ""
       , claimTx = Nothing
       , hasWallet = flags.hasWallet
+      , connectInProg = False
+      , claimInProg = False
       }
     , Content.gen
         |> Random.generate Types.RandCb
