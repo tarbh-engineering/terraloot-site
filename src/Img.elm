@@ -1,7 +1,8 @@
-module Img exposing (bg, loot, metamask, sun, walletConnect)
+module Img exposing (bg, jsn, loot, metamask, sun, walletConnect)
 
 import Array exposing (Array)
 import Element exposing (Element)
+import Json.Encode as JE
 import Svg exposing (Svg, clipPath, defs, ellipse, path, rect, style, svg, text, text_)
 import Svg.Attributes exposing (class, cx, cy, d, fill, height, id, preserveAspectRatio, rx, ry, stroke, strokeLinecap, strokeLinejoin, viewBox, width, x, y)
 
@@ -51,6 +52,47 @@ loot n xs =
         , text_ [ x "8", y "158" ] [ get 6 n xs |> text ]
         , text_ [ x "8", y "181" ] [ get 7 n xs |> text ]
         ]
+
+
+jsn : Array String -> String
+jsn =
+    Array.toList
+        >> List.indexedMap Tuple.pair
+        >> JE.list
+            (\( n, v ) ->
+                JE.object
+                    [ ( "trait_type"
+                      , (case n of
+                            0 ->
+                                "Outfit"
+
+                            1 ->
+                                "Tool"
+
+                            2 ->
+                                "Handheld Gadget"
+
+                            3 ->
+                                "Wearable Gadget"
+
+                            4 ->
+                                "Shoulder Gadget"
+
+                            5 ->
+                                "Backpack"
+
+                            6 ->
+                                "External Gadget"
+
+                            _ ->
+                                "Rig"
+                        )
+                            |> JE.string
+                      )
+                    , ( "value", JE.string v )
+                    ]
+            )
+        >> JE.encode 2
 
 
 metamask : Element msg

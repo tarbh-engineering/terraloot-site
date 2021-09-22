@@ -1,5 +1,6 @@
 module View exposing (view)
 
+import Array exposing (Array)
 import Element exposing (Attribute, Color, Element, centerX, column, el, fill, height, padding, paragraph, rgb255, row, spacing, text, width)
 import Element.Background as BG
 import Element.Border as Border
@@ -53,7 +54,7 @@ viewHome model =
                 15
 
             else
-                19
+                20
     in
     [ Input.button [ Element.alignRight, hover ]
         { onPress = Just <| Types.SetView Types.ViewAbout
@@ -89,7 +90,7 @@ viewHome model =
         |> el [ centerX ]
     , [ Input.button [ Font.underline, hover, Font.size fn ]
             { onPress = Just <| Types.SetView Types.ViewAbout
-            , label = text "Learn More"
+            , label = text "FAQ"
             }
       , Element.newTabLink [ hover, Font.underline, Font.size fn ]
             { url = "https://twitter.com/terraloot"
@@ -101,16 +102,8 @@ viewHome model =
             }
       ]
         |> row [ spacing 30, centerX, Font.color white ]
-    , Input.button
-        [ cappedWidth 400
-        , centerX
-        , style "cursor" "crosshair"
-        ]
-        { onPress = Just Types.Create
-        , label =
-            Img.loot model.index model.loot
-                |> Element.html
-        }
+    , display model.index model.loot
+        |> el [ centerX, cappedWidth 400 ]
     ]
         |> column
             [ centerX
@@ -140,7 +133,7 @@ viewAbout model =
           , text "/ˈterəˌfôrm/"
                 |> el [ Element.alignBottom ]
           ]
-            |> row [ spacing 10 ]
+            |> Element.wrappedRow [ spacing 10 ]
         , [ text "(especially in science fiction) transform (a planet) so as to resemble the earth, especially so that it can support human life." ]
             |> paragraph [ Font.italic ]
         ]
@@ -161,27 +154,35 @@ viewAbout model =
           , text "."
           ]
             |> paragraph []
-        , jsn
+        , [ "Outfit"
+          , "Tool"
+          , "Handheld Gadget"
+          , "Wearable Gadget"
+          , "Shoulder Gadget"
+          , "Backpack"
+          , "External Gadget"
+          , "Rig"
+          ]
+            |> List.map
+                (\txt ->
+                    text <| "- " ++ txt
+                )
+            |> column [ spacing 10 ]
+        , Img.jsn model.loot
             |> Html.text
             |> Element.html
             |> el
-                [ width fill
-                , style "white-space" "pre-wrap"
+                [ style "white-space" "pre-wrap"
                 , style "overflow-wrap" "anywhere"
                 , padding 20
                 , BG.color white
                 , Font.color black
                 , Font.size 12
-                , width fill
                 ]
-        , Element.image
-            [ cappedWidth 400
-            ]
-            { src = img
-            , description = ""
-            }
+        , display model.index model.loot
+            |> el [ cappedWidth 400 ]
         ]
-            |> column [ spacing 20 ]
+            |> column [ spacing 30 ]
             |> wrapper "Attributes"
       , [ [ text "Synthetic gear (for every Ethereum address)" ]
             |> paragraph []
@@ -216,6 +217,20 @@ viewAbout model =
         ]
             |> column [ spacing 20 ]
             |> wrapper "Inspiration"
+      , [ text "This website is "
+        , Element.newTabLink [ hover, Font.underline ]
+            { url = "https://github.com/tarbh-engineering/terraloot-site"
+            , label = text "open-source"
+            }
+        , text "."
+        ]
+            |> paragraph
+                [ width fill
+                , BG.color black
+                , Font.color white
+                , padding 30
+                , Font.center
+                ]
       ]
         |> column
             [ spacing 40
@@ -389,9 +404,9 @@ viewFaq model =
       ]
         |> column [ spacing 10 ]
     , [ subheader "Who built this?"
-      , Element.newTabLink [ hover, read ]
+      , Element.newTabLink [ hover, read, Font.underline ]
             { url = "https://github.com/ronanyeah"
-            , label = text "@ronanyeah"
+            , label = text "ronanmccabe.eth"
             }
       ]
         |> column [ spacing 10 ]
@@ -467,49 +482,6 @@ read =
 fade : Element.Attr a b
 fade =
     Element.alpha 0.7
-
-
-jsn : String
-jsn =
-    """[
-  {
-    "trait_type": "Outfit",
-    "value": "Opticamo"
-  },
-  {
-    "trait_type": "Tool",
-    "value": "Vibrahammer"
-  },
-  {
-    "trait_type": "Handheld Gadget",
-    "value": "Flare Launcher"
-  },
-  {
-    "trait_type": "Wearable Gadget",
-    "value": "Utility Belt"
-  },
-  {
-    "trait_type": "Shoulder Gadget",
-    "value": "“Acid Galvanized” Imaging Sonar 🛸"
-  },
-  {
-    "trait_type": "Backpack",
-    "value": "“Entropy Activated” Big Box 🦾"
-  },
-  {
-    "trait_type": "External Gadget",
-    "value": "Scootbike"
-  },
-  {
-    "trait_type": "Rig",
-    "value": "Area Shield"
-  }
-]"""
-
-
-img : String
-img =
-    "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHByZXNlcnZlQXNwZWN0UmF0aW89InhNaW5ZTWluIG1lZXQiIHZpZXdCb3g9IjAgMCAzNTAgMzUwIj48ZGVmcz48Y2xpcFBhdGggaWQ9ImNscCI+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIvPjwvY2xpcFBhdGg+PC9kZWZzPjxzdHlsZT50ZXh0e2ZpbGw6I2ZmZjtmb250LWZhbWlseTpTb3VyY2UgQ29kZSBQcm87Zm9udC1zaXplOjEzcHh9LnRhZ3tmb250LXNpemU6MjRweH1lbGxpcHNle2NsaXAtcGF0aDp1cmwoI2NscCl9PC9zdHlsZT48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjMDAwMDIwIi8+PGVsbGlwc2UgY3g9IjMyMCIgY3k9IjMyMCIgcng9IjEzMCIgcnk9IjEzMCIgZmlsbD0iI2MzMjIwNSIvPjx0ZXh0IHg9IjI0MCIgeT0iMzM1IiBjbGFzcz0idGFnIj5UTDoyODI5PC90ZXh0Pjx0ZXh0IHg9IjgiIHk9IjIwIj5PcHRpY2FtbzwvdGV4dD48dGV4dCB4PSI4IiB5PSI0MyI+VmlicmFoYW1tZXI8L3RleHQ+PHRleHQgeD0iOCIgeT0iNjYiPkZsYXJlIExhdW5jaGVyPC90ZXh0Pjx0ZXh0IHg9IjgiIHk9Ijg5Ij5VdGlsaXR5IEJlbHQ8L3RleHQ+PHRleHQgeD0iOCIgeT0iMTEyIj7igJxBY2lkIEdhbHZhbml6ZWTigJ0gSW1hZ2luZyBTb25hciDwn5u4PC90ZXh0Pjx0ZXh0IHg9IjgiIHk9IjEzNSI+4oCcRW50cm9weSBBY3RpdmF0ZWTigJ0gQmlnIEJveCDwn6a+PC90ZXh0Pjx0ZXh0IHg9IjgiIHk9IjE1OCI+U2Nvb3RiaWtlPC90ZXh0Pjx0ZXh0IHg9IjgiIHk9IjE4MSI+QXJlYSBTaGllbGQ8L3RleHQ+PC9zdmc+"
 
 
 scroller : Element msg -> Element msg
@@ -611,3 +583,17 @@ spinner =
         |> el
             [ rotate
             ]
+
+
+display : Int -> Array String -> Element Msg
+display n xs =
+    Input.button
+        [ width fill
+        , style "cursor" "crosshair"
+        , Element.mouseOver [ Border.glow white 0.6 ]
+        ]
+        { onPress = Just Types.Create
+        , label =
+            Img.loot n xs
+                |> Element.html
+        }

@@ -97,11 +97,6 @@ update msg model =
             , Cmd.none
             )
 
-        CreateCb _ ->
-            ( model
-            , Cmd.none
-            )
-
         WConnect ->
             ( model
             , Ports.wConnect ()

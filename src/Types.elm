@@ -57,7 +57,6 @@ type Msg
     | WConnect
     | ConnectCb Value
     | Create
-    | CreateCb Int
     | RandCb (List ( Int, Int ))
     | Claim
     | IdUpdate String
